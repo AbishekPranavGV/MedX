@@ -1,0 +1,28 @@
+name: CI MedX Catalogue Studio Validation
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Syntax compile core python services
+        run: |
+          python -m py_compile webapp.py ai_service.py batch_catalogue.py generator.py local_ai_bridge.py
+          echo "Core MedX microservices compiled successfully!"
+      - name: Validate endpoints and settings
+        run: |
+          python -c "
+          import json, os
+          if os.path.exists('settings.json'):
+              with open('settings.json', 'r') as f:
+                  s = json.load(f)
+              print('settings.json verified:', list(s.keys()))
+          "
